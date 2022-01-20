@@ -5,10 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class MyService: Service() {
     private val scope= CoroutineScope(Dispatchers.Main)
@@ -37,6 +34,7 @@ class MyService: Service() {
     override fun onDestroy() {
         super.onDestroy()
         log("onDestroy")
+        scope.cancel()
 
     }
 

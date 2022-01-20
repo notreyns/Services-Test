@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import ru.sumin.servicestest.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -22,7 +23,8 @@ class MainActivity : AppCompatActivity() {
             startService(MyService.newInstance(this))
         }
         binding.foregroundService.setOnClickListener {
-            showNotification()
+            ContextCompat.startForegroundService(this,
+                MyForegroundService.newInstance(this))
         }
     }
 
@@ -46,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val CHANNEL_ID = "channel_id"
-        const val CHANNLE_NAME = "channel_name"
+        private const val CHANNEL_ID = "channel_id"
+        private const val CHANNLE_NAME = "channel_name"
     }
 }

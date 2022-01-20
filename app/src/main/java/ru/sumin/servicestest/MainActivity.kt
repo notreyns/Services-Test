@@ -2,6 +2,9 @@ package ru.sumin.servicestest
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.job.JobInfo
+import android.app.job.JobScheduler
+import android.content.ComponentName
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -30,53 +33,20 @@ class MainActivity : AppCompatActivity() {
         binding.intentService.setOnClickListener {
             startService(MyIntentService.newInstance(this))
         }
-    }
+        binding.jobScheduler.setOnClickListener {
+            startMyJob()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    private fun showNotification() {
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                CHANNLE_NAME,
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-
-            notificationManager.createNotificationChannel(channel)
         }
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Title")
-            .setContentText("text")
-            .setSmallIcon(R.drawable.ic_launcher_background)
-            .build()
-        notificationManager.notify(id++, notification)
     }
+    private fun startMyJob() {
+        val componentName = ComponentName(this, MyJobService::class.java)
+        val jobInfo = JobInfo.Builder(MyJobService.JOB_ID,
+            componentName
+        ).setRequiresCharging(true)
+            .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+            .build()
 
-    companion object {
-        private const val CHANNEL_ID = "channel_id"
-        private const val CHANNLE_NAME = "channel_name"
+        val jobScheduler = getSystemService(JOB_SCHEDULER_SERVICE) as JobScheduler
+        jobScheduler.schedule(jobInfo)
     }
 }

@@ -27,7 +27,34 @@ class MainActivity : AppCompatActivity() {
             ContextCompat.startForegroundService(this,
                 MyForegroundService.newInstance(this))
         }
+        binding.intentService.setOnClickListener {
+            startService(MyIntentService.newInstance(this))
+        }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private fun showNotification() {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager

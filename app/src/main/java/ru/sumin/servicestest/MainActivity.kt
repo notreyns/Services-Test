@@ -36,7 +36,9 @@ class MainActivity : AppCompatActivity() {
         }
         binding.jobScheduler.setOnClickListener {
             startMyJob()
-
+        }
+        binding.jobIntentService.setOnClickListener {
+            MyJobIntentService.enqueue(this, page++)
         }
     }
     private fun startMyJob() {

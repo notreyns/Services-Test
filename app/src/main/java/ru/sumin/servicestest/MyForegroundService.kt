@@ -1,30 +1,34 @@
 package ru.sumin.servicestest
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.*
 
-class MyForegroundService : Service(){
+class MyForegroundService : Service() {
     private val scope = CoroutineScope(Dispatchers.Main)
-    private var id = 0
+
+    private val notificationBuilder by lazy { createNotificationBuilder() }
+    private val notificationManager by lazy { getSystemService(NOTIFICATION_SERVICE) as NotificationManager }
+
     override fun onCreate() {
         super.onCreate()
         log("onCreate")
         createNotificationChannel()
-        startForeground(NOTIFICATION_ID, createNotification())
-
+        startForeground(NOTIFICATION_ID, createNotificationBuilder().build())
     }
 
+    var progressChanged: ((Int) -> Unit)? = null
+
     override fun onBind(intent: Intent?): IBinder? {
-        TODO("Not yet implemented")
+        return LocalBinder()
     }
 
     private fun createNotificationChannel() {
@@ -39,18 +43,29 @@ class MyForegroundService : Service(){
         }
     }
 
-    private fun createNotification(): Notification = NotificationCompat.Builder(this, CHANNEL_ID)
+    inner class LocalBinder() : Binder() {
+        fun getService() = this@MyForegroundService
+    }
+
+    private fun createNotificationBuilder() = NotificationCompat.Builder(this, CHANNEL_ID)
         .setContentTitle("Title")
         .setContentText("text")
         .setSmallIcon(R.drawable.ic_launcher_background)
-        .build()
+        .setProgress(100, 0, false)
+        .setOnlyAlertOnce(true)
 
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         scope.launch {
-            for (i in 0 until 100) {
+            for (i in 0..100 step 5) {
                 delay(1000)
                 log("Timer $i")
+                val notification = notificationBuilder
+                    .setProgress(100, i, false)
+                    .build()
+                notificationManager.notify(NOTIFICATION_ID, notification)
+                progressChanged?.invoke(i)
+
             }
         }
         return START_STICKY
@@ -73,7 +88,6 @@ class MyForegroundService : Service(){
         private const val CHANNEL_ID = "channel_id"
         private const val CHANNLE_NAME = "channel_name"
         private const val NOTIFICATION_ID = 1
-
 
         fun newInstance(context: Context): Intent {
             return Intent(context, MyForegroundService::class.java)
